@@ -541,7 +541,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   useEffects: 1
   INPUTS: 2
-  OUTPUTS: 4
+  OUTPUTS: 42
 --- !u!1 &1513881973
 GameObject:
   m_ObjectHideFlags: 0
