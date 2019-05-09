@@ -27,6 +27,7 @@ namespace TestSharedStack
 enum Param
 {
 	P_JACKCHANNELINDEX,
+	P_OBJECT,
     P_MIXEROUTVOL,
     P_NUM
 };
@@ -44,6 +45,7 @@ int InternalRegisterEffectDefinition(UnityAudioEffectDefinition& definition)
     int numparams = P_NUM;
     definition.paramdefs = new UnityAudioParameterDefinition[numparams];
     RegisterParameter(definition, "Jack Channel", "", 0.0f, 64.0f, 0.0f, 1.0f, 1.0f, P_JACKCHANNELINDEX, "The jack channel input number");
+	RegisterParameter(definition, "Object/Mono", "", 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, P_OBJECT, "Object mode/downmix to mono (>0.5f) or not (<= 0.5f)");
     RegisterParameter(definition, "Output Volume", "", 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, P_MIXEROUTVOL, "Volume output to Unity mixer");
 
     return numparams;
@@ -89,17 +91,27 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
     // which corresponds to 1024 samples in Jack
     
 #ifdef DEBUG_OUT
-	if (inchannels == 1) {
-		JackClient::getInstance().SetData(data->p[P_JACKCHANNELINDEX], inbuffer);
-	} else {
-		//downmix
-		for (int i = 0, j = 0; i < length * inchannels; i += inchannels, j++) {
-			data->tmpbuffer_out[j] = 0;
-			for (int k = 0; k < inchannels; k++) {
-				data->tmpbuffer_out[j] += inbuffer[i + k];
+	if (data->p[P_OBJECT] > 0.5f) {
+		if (inchannels == 1) {
+			JackClient::getInstance().SetData(data->p[P_JACKCHANNELINDEX], inbuffer);
+		} else {
+			//downmix
+			for (int inputSampleIndex = 0, outputSampleIndex = 0; inputSampleIndex < length * inchannels; inputSampleIndex += inchannels, outputSampleIndex++) {
+				data->tmpbuffer_out[outputSampleIndex] = 0;
+				for (int inputChannelIndex = 0; inputChannelIndex < inchannels; inputChannelIndex++) {
+					data->tmpbuffer_out[outputSampleIndex] += inbuffer[inputSampleIndex + inputChannelIndex];
+				}
 			}
+			JackClient::getInstance().SetData(data->p[P_JACKCHANNELINDEX], data->tmpbuffer_out);
 		}
-		JackClient::getInstance().SetData(data->p[P_JACKCHANNELINDEX], data->tmpbuffer_out);
+	} else {
+		// channel-split to Jack's inputs
+		for (int inputChannelIndex = 0; inputChannelIndex < inchannels; inputChannelIndex++) {
+			for (int inputSampleIndex = 0, outputSampleIndex = 0; inputSampleIndex < length * inchannels; inputSampleIndex += inchannels, outputSampleIndex++) {
+				data->tmpbuffer_out[outputSampleIndex] = inbuffer[inputSampleIndex + inputChannelIndex];;
+			}
+			JackClient::getInstance().SetData(data->p[P_JACKCHANNELINDEX] + inputChannelIndex, data->tmpbuffer_out);
+		}
 	}
 #else
     if (inchannels == 2)
