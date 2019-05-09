@@ -69,11 +69,19 @@ AudioMixerSnapshotController:
   m_SnapshotID: 3859d488ac3fb4f5ca6fa1e2252a5366
   m_FloatValues:
     a93c3312462e64cc6a86241098014075: 3
+    3fb53ce2786834eafb61c9ee5fb94d58: 0
+    1440bb13ef81b44348db77c221646fbc: 0
+    92666043ca64cb547927445d9587e946: 3
+    0da37953013300046a895825cf99ca49: 2
+    730548a457e73af4e8ac74bf54dbf060: 1
+    8f0d19b5d252f4d229721d9a717e74c0: 0
     d8406eb5165e943ed9b3414298c5a2b9: 0
     adb1e0e57547a4fd1b330403477ac869: 0
     a07740c6fdbc24c9bbe51173cc8cda4f: 0
     7214a26a3240d406792c71703ca73af4: 1
+    0475d46a500fe34448cb1239e24047ea: 0
     c38473bb43bd94136a98e9347d8b729a: 2
+    db34ddbdca3f645e2b9e4abd87510446: 0
   m_TransitionOverrides: {}
 --- !u!243 &243000012442707746
 AudioMixerGroupController:
@@ -174,6 +182,8 @@ AudioMixerEffectController:
     m_GUID: 042656d05173e42f4a1adcd02a06b3ec
   - m_ParameterName: INDEX
     m_GUID: c38473bb43bd94136a98e9347d8b729a
+  - m_ParameterName: Jack Channel
+    m_GUID: 0da37953013300046a895825cf99ca49
   m_SendTarget: {fileID: 0}
   m_EnableWetMix: 0
   m_Bypass: 0
@@ -204,6 +214,8 @@ AudioMixerEffectController:
     m_GUID: 34dae7b7941034df0b63109c857ff155
   - m_ParameterName: INDEX
     m_GUID: a93c3312462e64cc6a86241098014075
+  - m_ParameterName: Jack Channel
+    m_GUID: 92666043ca64cb547927445d9587e946
   m_SendTarget: {fileID: 0}
   m_EnableWetMix: 0
   m_Bypass: 0
@@ -221,6 +233,8 @@ AudioMixerEffectController:
     m_GUID: adb1e0e57547a4fd1b330403477ac869
   - m_ParameterName: INDEX
     m_GUID: d8406eb5165e943ed9b3414298c5a2b9
+  - m_ParameterName: Output Volume
+    m_GUID: 0475d46a500fe34448cb1239e24047ea
   m_SendTarget: {fileID: 0}
   m_EnableWetMix: 0
   m_Bypass: 0
@@ -251,6 +265,8 @@ AudioMixerEffectController:
     m_GUID: a07740c6fdbc24c9bbe51173cc8cda4f
   - m_ParameterName: INDEX
     m_GUID: 7214a26a3240d406792c71703ca73af4
+  - m_ParameterName: Jack Channel
+    m_GUID: 730548a457e73af4e8ac74bf54dbf060
   m_SendTarget: {fileID: 0}
   m_EnableWetMix: 0
   m_Bypass: 0

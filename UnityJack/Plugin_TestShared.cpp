@@ -26,8 +26,8 @@ namespace TestSharedStack
 
 enum Param
 {
-    P_PARAM1,
-    P_INDEX,
+	P_JACKCHANNELINDEX,
+    P_MIXEROUTVOL,
     P_NUM
 };
 
@@ -43,8 +43,8 @@ int InternalRegisterEffectDefinition(UnityAudioEffectDefinition& definition)
 {
     int numparams = P_NUM;
     definition.paramdefs = new UnityAudioParameterDefinition[numparams];
-    RegisterParameter(definition, "INDEX", "", 0.0f, 64.0f, 0.0f, 1.0f, 1.0f, P_INDEX, "User-defined parameter 1 (read/write)");
-    RegisterParameter(definition, "VOL", "", 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, P_PARAM1, "User-defined parameter 1 (read/write)");
+    RegisterParameter(definition, "Jack Channel", "", 0.0f, 64.0f, 0.0f, 1.0f, 1.0f, P_JACKCHANNELINDEX, "The jack channel input number");
+    RegisterParameter(definition, "Output Volume", "", 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, P_MIXEROUTVOL, "Volume output to Unity mixer");
 
     return numparams;
 }
@@ -79,7 +79,7 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
     {
         for (int i = 0; i < outchannels; i++)
         {
-            outbuffer[n * outchannels + i] = inbuffer[n * outchannels + i] * data->p[P_PARAM1];
+            outbuffer[n * outchannels + i] = inbuffer[n * outchannels + i] * data->p[P_MIXEROUTVOL];
         }
     }
     
@@ -89,20 +89,18 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
     // which corresponds to 1024 samples in Jack
     
 #ifdef DEBUG_OUT
-    if (inchannels == 2)
-    {
-        //downmix
-        for (int i = 0, j = 0; i < length * 2; i += 2)
-        {
-            data->tmpbuffer_out[j++] = inbuffer[i] + inbuffer[i+1];
-        }
-        
-        JackClient::getInstance().SetData( data->p[P_INDEX], data->tmpbuffer_out);
-
-        
-    } else if (inchannels == 1) {
-        JackClient::getInstance().SetData( data->p[P_INDEX], inbuffer );
-    }
+	if (inchannels == 1) {
+		JackClient::getInstance().SetData(data->p[P_JACKCHANNELINDEX], inbuffer);
+	} else {
+		//downmix
+		for (int i = 0, j = 0; i < length * inchannels; i += inchannels, j++) {
+			data->tmpbuffer_out[j] = 0;
+			for (int k = 0; k < inchannels; k++) {
+				data->tmpbuffer_out[j] += inbuffer[i + k];
+			}
+		}
+		JackClient::getInstance().SetData(data->p[P_JACKCHANNELINDEX], data->tmpbuffer_out);
+	}
 #else
     if (inchannels == 2)
     {
