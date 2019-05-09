@@ -26,9 +26,9 @@ namespace TestSharedStack
 
 enum Param
 {
-	P_JACKCHANNELINDEX,
-	P_OBJECT,
-    P_MIXEROUTVOL,
+	P_JACK_CHANNEL_INDEX,
+	P_OBJECT_MODE,
+    P_MIXER_OUT_VOLUME,
     P_NUM
 };
 
@@ -44,9 +44,9 @@ int InternalRegisterEffectDefinition(UnityAudioEffectDefinition& definition)
 {
     int numparams = P_NUM;
     definition.paramdefs = new UnityAudioParameterDefinition[numparams];
-    RegisterParameter(definition, "Jack Channel", "", 0.0f, 64.0f, 0.0f, 1.0f, 1.0f, P_JACKCHANNELINDEX, "The jack channel input number");
-	RegisterParameter(definition, "Object/Mono", "", 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, P_OBJECT, "Object mode/downmix to mono (>0.5f) or not (<= 0.5f)");
-    RegisterParameter(definition, "Output Volume", "", 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, P_MIXEROUTVOL, "Volume output to Unity mixer");
+    RegisterParameter(definition, "Jack Channel", "", 0.0f, 64.0f, 0.0f, 1.0f, 1.0f, P_JACK_CHANNEL_INDEX, "The jack channel input number");
+	RegisterParameter(definition, "Object/Mono", "", 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, P_OBJECT_MODE, "Object mode/downmix to mono (>0.5f) or not (<= 0.5f)");
+    RegisterParameter(definition, "Output Volume", "", 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, P_MIXER_OUT_VOLUME, "Volume output to Unity mixer");
 
     return numparams;
 }
@@ -81,7 +81,7 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
     {
         for (int i = 0; i < outchannels; i++)
         {
-            outbuffer[n * outchannels + i] = inbuffer[n * outchannels + i] * data->p[P_MIXEROUTVOL];
+            outbuffer[n * outchannels + i] = inbuffer[n * outchannels + i] * data->p[P_MIXER_OUT_VOLUME];
         }
     }
     
@@ -91,9 +91,9 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
     // which corresponds to 1024 samples in Jack
     
 #ifdef DEBUG_OUT
-	if (data->p[P_OBJECT] > 0.5f) {
+	if (data->p[P_OBJECT_MODE] > 0.5f) {
 		if (inchannels == 1) {
-			JackClient::getInstance().SetData(data->p[P_JACKCHANNELINDEX], inbuffer);
+			JackClient::getInstance().SetData(data->p[P_JACK_CHANNEL_INDEX], inbuffer);
 		} else {
 			//downmix
 			for (int inputSampleIndex = 0, outputSampleIndex = 0; inputSampleIndex < length * inchannels; inputSampleIndex += inchannels, outputSampleIndex++) {
@@ -102,7 +102,7 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
 					data->tmpbuffer_out[outputSampleIndex] += inbuffer[inputSampleIndex + inputChannelIndex];
 				}
 			}
-			JackClient::getInstance().SetData(data->p[P_JACKCHANNELINDEX], data->tmpbuffer_out);
+			JackClient::getInstance().SetData(data->p[P_JACK_CHANNEL_INDEX], data->tmpbuffer_out);
 		}
 	} else {
 		// channel-split to Jack's inputs
@@ -110,7 +110,7 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
 			for (int inputSampleIndex = 0, outputSampleIndex = 0; inputSampleIndex < length * inchannels; inputSampleIndex += inchannels, outputSampleIndex++) {
 				data->tmpbuffer_out[outputSampleIndex] = inbuffer[inputSampleIndex + inputChannelIndex];;
 			}
-			JackClient::getInstance().SetData(data->p[P_JACKCHANNELINDEX] + inputChannelIndex, data->tmpbuffer_out);
+			JackClient::getInstance().SetData(data->p[P_JACK_CHANNEL_INDEX] + inputChannelIndex, data->tmpbuffer_out);
 		}
 	}
 #else
