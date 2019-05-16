@@ -85,17 +85,41 @@ public:
 	
     int SetData(int idx, float* buffer) {
         
-        if (!initialized) return 0;
-        
+		// FIXME: The reason why you need to set the exact jack output channel count in 
+		// Unity is that for interfacing the mixedBuffer here one needs to know the 
+		// jack output channel count
+		// -> replace mixedBuffer with data structure self-containing the channel number
+		
+		std::cout << "JACK: setting audio data ..." << std::endl;
         for (int i = 0; i < BUFSIZE; i++) {
-            mixedBuffer[(i * _outputs) + idx] = buffer[i];
+			tempBuffer.push_back(buffer[i]);
         }
+		outputBuffer.push_back(tempBuffer);
+		tempBuffer.clear();
         
         // Increase the index until the mixed buffer is filled.
         track++;
 
         // if filled send to ringbuffer, restart index
-        if (track == _outputs) {
+        if (track == GetJackOutputChannelCount()-1) {
+			std::cout << "JACK: checking if initialized" << std::endl;
+			if (!initialized) {
+				std::cout << "JACK: initializing ..." << std::endl;
+				auto success = createClient(0, GetJackOutputChannelCount());
+				if (!success) {
+					std::cout << "JACK: initializing failed!" << std::endl;
+					return 0;
+				}
+			}
+			else {
+				std::cout << "JACK: Already initialaized" << std::endl;
+			}
+			float* ptrMixedBuffer = mixedBuffer;
+			for (size_t i = 0; i < outputBuffer.size(); i++) {
+				std::copy(outputBuffer[i].begin(), outputBuffer[i].end(), ptrMixedBuffer);
+				ptrMixedBuffer += outputBuffer[i].size();
+			}
+
             client->setAudioBuffer(mixedBuffer);
             track = 0;
         }
@@ -162,6 +186,32 @@ private:
 public:
     JackClient(JackClient const&) = delete;
     void operator=(JackClient const&)  = delete;
+	// Only call this from the Unity jack send plugin. Keeps track of how many plugins are instantiated and with what channel count
+	void RegisterJackOutputChannelFromMixerPlugin(int channels) {
+		std::cout << "JACK: Input channel number is " << channels << std::endl;
+		jackOutputChannels.push_back(channels);
+		std::cout << "JACK: channels pushed back!" << std::endl;
+	}
+	int GetJackPluginInstanceIndex() {
+		return jackPluginInstanceIndex++;
+	}
+	int GetJackOutputChannelCount() {
+		int channels = 0;
+		for (size_t i = 0; i < jackOutputChannels.size(); i++) {
+			channels += jackOutputChannels[i];
+		}
+		std::cout << "Channels: " << channels << std::endl;
+		if (channels < jackPluginInstanceIndex) {
+			std::cout << "Returning channels: " << jackPluginInstanceIndex << std::endl;
+			return jackPluginInstanceIndex;
+		} else {
+			std::cout << "Returning Channels: " << channels << std::endl;
+			return channels;
+		}
+	}
+	int GetJackOutputTracks() {
+		return jackOutputChannels.size();
+	}
 
 private:
 
@@ -171,12 +221,16 @@ private:
     // float mixedBufferIn[TRACKS * BUFSIZE];
     float *mixedBuffer;
     float *mixedBufferIn;
+	std::vector<std::vector<float>> outputBuffer;
+	std::vector<float> tempBuffer;
 
     int foo = 5;
     int track;
     bool initialized;
     int _inputs, _outputs;
     int _index;
+	std::vector<int> jackOutputChannels;
+	int jackPluginInstanceIndex = 0;
 };
     
 } // !namespace TestSharedStack

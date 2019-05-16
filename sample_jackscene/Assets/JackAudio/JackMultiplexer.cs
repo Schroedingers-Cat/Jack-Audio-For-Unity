@@ -32,6 +32,7 @@ namespace JackAudio
         // Default unity buffer size per mono block
         private int BUFFER_SIZE = 1024;
         public bool useEffects;
+        public bool autoCreateJack = true;
 
         [HideInInspector]
         public float[][] combinedBuffers;
@@ -95,7 +96,9 @@ namespace JackAudio
             mixedBufferIn = new float[INPUTS * BUFFER_SIZE];
 
             // Start Engine
-            JackWrapper.StartJackClient(INPUTS, OUTPUTS);
+            if (!autoCreateJack) {
+                JackWrapper.StartJackClient(INPUTS, OUTPUTS);
+            }
             started = true;
         }
 
