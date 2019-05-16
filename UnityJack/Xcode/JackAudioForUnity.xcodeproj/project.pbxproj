@@ -235,7 +235,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_LOCATION = YES;
-				DSTROOT = "$(PROJECT_DIR)/../../sample_jackscene/Assets/Plugins";
+				DSTROOT = "$(PROJECT_DIR)/../../sample_jackscene/Assets";
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -266,7 +266,7 @@
 			buildSettings = {
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = YES;
-				DSTROOT = "$(PROJECT_DIR)/../../sample_jackscene/Assets/Plugins";
+				DSTROOT = "$(PROJECT_DIR)/../../sample_jackscene/Assets";
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = (
