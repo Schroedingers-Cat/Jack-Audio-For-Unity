@@ -112,7 +112,8 @@
     </Link>
     <PostBuildEvent>
       <Command>mkdir ..\..\sample_jackscene\Assets\Plugins\x86
-copy /y "$(TargetPath)" ..\..\sample_jackscene\Assets\Plugins\x86\$(TargetName).dll</Command>
+copy /y "$(TargetPath)" ..\..\sample_jackscene\Assets\Plugins\x86\$(TargetName).dll
+copy /y "$(TargetDir)$(TargetName).pdb" ..\..\sample_jackscene\Assets\Plugins\x86\$(TargetName).pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -136,7 +137,8 @@ copy /y "$(TargetPath)" ..\..\sample_jackscene\Assets\Plugins\x86\$(TargetName).
     </Link>
     <PostBuildEvent>
       <Command>mkdir ..\..\sample_jackscene\Assets\Plugins\x86_64
-copy /y "$(TargetPath)" ..\..\sample_jackscene\Assets\Plugins\x86_64\$(TargetName).dll</Command>
+copy /y "$(TargetPath)" ..\..\sample_jackscene\Assets\Plugins\x86_64\$(TargetName).dll
+copy /y "$(TargetDir)$(TargetName).pdb" ..\..\sample_jackscene\Assets\Plugins\x86_64\$(TargetName).pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
