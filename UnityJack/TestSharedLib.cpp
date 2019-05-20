@@ -70,11 +70,7 @@ public:
         // Instantiated on first use.
         return instance;
     }
-    
-    
-    int GenerateIndex() {
-        return _index++;
-    }
+
     int SetAllData(float* buffer) {
         
         if (!initialized) return 0;
@@ -83,42 +79,33 @@ public:
         return 0;
     }
 	
-    int SetData(int idx, float* buffer) {
+    int SetData(int idx, std::vector<float> buffer) {
         
 		// FIXME: The reason why you need to set the exact jack output channel count in 
 		// Unity is that for interfacing the mixedBuffer here one needs to know the 
 		// jack output channel count
 		// -> replace mixedBuffer with data structure self-containing the channel number
-		
-		std::cout << "JACK: setting audio data ..." << std::endl;
-        for (int i = 0; i < BUFSIZE; i++) {
-			tempBuffer.push_back(buffer[i]);
-        }
-		outputBuffer.push_back(tempBuffer);
-		tempBuffer.clear();
+		outputBuffer.push_back(buffer);
         
         // Increase the index until the mixed buffer is filled.
         track++;
 
         // if filled send to ringbuffer, restart index
-        if (track == GetJackOutputChannelCount()-1) {
-			std::cout << "JACK: checking if initialized" << std::endl;
+		auto JackOutputChannelCount = GetJackOutputChannelCount();
+        if (track == JackOutputChannelCount) {
 			if (!initialized) {
-				std::cout << "JACK: initializing ..." << std::endl;
-				auto success = createClient(0, GetJackOutputChannelCount());
+				auto success = createClient(0, JackOutputChannelCount);
 				if (!success) {
-					std::cout << "JACK: initializing failed!" << std::endl;
 					return 0;
 				}
 			}
-			else {
-				std::cout << "JACK: Already initialaized" << std::endl;
-			}
+
 			float* ptrMixedBuffer = mixedBuffer;
 			for (size_t i = 0; i < outputBuffer.size(); i++) {
 				std::copy(outputBuffer[i].begin(), outputBuffer[i].end(), ptrMixedBuffer);
 				ptrMixedBuffer += outputBuffer[i].size();
 			}
+			outputBuffer.clear();
 
             client->setAudioBuffer(mixedBuffer);
             track = 0;
@@ -192,7 +179,7 @@ public:
 		jackOutputChannels.push_back(channels);
 		std::cout << "JACK: channels pushed back!" << std::endl;
 	}
-	int GetJackPluginInstanceIndex() {
+	int IncreaseJackPluginInstanceIndex() {
 		return jackPluginInstanceIndex++;
 	}
 	int GetJackOutputChannelCount() {
@@ -212,6 +199,10 @@ public:
 	int GetJackOutputTracks() {
 		return jackOutputChannels.size();
 	}
+	void ResetOutputTrackCount() {
+		jackPluginInstanceIndex = 0;
+		jackOutputChannels.clear();
+	}
 
 private:
 
@@ -222,13 +213,11 @@ private:
     float *mixedBuffer;
     float *mixedBufferIn;
 	std::vector<std::vector<float>> outputBuffer;
-	std::vector<float> tempBuffer;
 
     int foo = 5;
     int track;
     bool initialized;
     int _inputs, _outputs;
-    int _index;
 	std::vector<int> jackOutputChannels;
 	int jackPluginInstanceIndex = 0;
 };

@@ -36,7 +36,7 @@ struct EffectData
 {
     float p[P_NUM];
     float tmpbuffer_in[BUFSIZE];
-    float tmpbuffer_out[BUFSIZE];
+	std::vector<float> tmpbuffer_out;
 	bool start;
 	bool instanceNumber;
 
@@ -58,7 +58,8 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK CreateCallback(UnityAudioEffectSta
     EffectData* data = new EffectData;
     memset(data, 0, sizeof(EffectData));
 	data->start = true;
-	data->instanceNumber = JackClient::getInstance().GetJackPluginInstanceIndex();
+	data->instanceNumber = JackClient::getInstance().IncreaseJackPluginInstanceIndex();
+	data->tmpbuffer_out.assign(BUFSIZE, 0);
     state->effectdata = data;
     InitParametersFromDefinitions(InternalRegisterEffectDefinition, data->p);
 
@@ -73,6 +74,8 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK CreateCallback(UnityAudioEffectSta
 UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ReleaseCallback(UnityAudioEffectState* state)
 {
     EffectData* data = state->GetEffectData<EffectData>();
+	JackClient::getInstance().ResetOutputTrackCount();
+	JackClient::getInstance().destroyClient();
     delete data;
     return UNITY_AUDIODSP_OK;
 }
@@ -80,12 +83,9 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ReleaseCallback(UnityAudioEffectSt
 UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectState* state, float* inbuffer, float* outbuffer, unsigned int length, int inchannels, int outchannels)
 {
     EffectData* data = state->GetEffectData<EffectData>();
-	std::cout << "JACK: Checking if start ..." << std::endl;
 	if (data->start)
 	{
-		std::cout << "JACK: Start!" << std::endl;
 		data->start = false;
-		std::cout << "JACK: Start bool changed ..." << std::endl; 
 		if (data->p[P_OBJECT_MODE] > 0.5f) {
 			JackClient::getInstance().RegisterJackOutputChannelFromMixerPlugin(1);
 		} else {
@@ -110,7 +110,8 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
 #ifdef DEBUG_OUT
 	if (data->p[P_OBJECT_MODE] > 0.5f) {
 		if (inchannels == 1) {
-			JackClient::getInstance().SetData(data->p[P_JACK_CHANNEL_INDEX], inbuffer);
+			data->tmpbuffer_out.assign(inbuffer, inbuffer + length);
+			JackClient::getInstance().SetData(data->p[P_JACK_CHANNEL_INDEX], data->tmpbuffer_out);
 		} else {
 			//downmix
 			for (int inputSampleIndex = 0, outputSampleIndex = 0; inputSampleIndex < length * inchannels; inputSampleIndex += inchannels, outputSampleIndex++) {
@@ -119,7 +120,6 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
 					data->tmpbuffer_out[outputSampleIndex] += inbuffer[inputSampleIndex + inputChannelIndex];
 				}
 			}
-			std::cout << "JACK: Calling setData ..." << std::endl;
 			JackClient::getInstance().SetData(data->p[P_JACK_CHANNEL_INDEX], data->tmpbuffer_out);
 		}
 	} else {
@@ -128,7 +128,6 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
 			for (int inputSampleIndex = 0, outputSampleIndex = 0; inputSampleIndex < length * inchannels; inputSampleIndex += inchannels, outputSampleIndex++) {
 				data->tmpbuffer_out[outputSampleIndex] = inbuffer[inputSampleIndex + inputChannelIndex];;
 			}
-			std::cout << "JACK: Calling setData ..." << std::endl;
 			JackClient::getInstance().SetData(data->p[P_JACK_CHANNEL_INDEX] + inputChannelIndex, data->tmpbuffer_out);
 		}
 	}
