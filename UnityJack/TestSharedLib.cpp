@@ -79,30 +79,35 @@ public:
         return 0;
     }
 	
-    int SetData(int idx, std::vector<float> buffer) {
-		outputBuffer.push_back(buffer);
+    int SetData(int idx, float* buffer) {
+		auto JackOutputChannelCount = GetJackOutputChannelCount();
+
+		if (!initialized) {
+			outputBuffer.push_back(std::vector<float>(buffer[0], buffer[BUFSIZE]));
+		} else {
+			for (size_t i = 0; i < BUFSIZE; i++) {
+				mixedBuffer[(i * JackOutputChannelCount) + idx] = buffer[i];
+			}
+		}
+		
         
         // Increase the index until the mixed buffer is filled.
         track++;
 
         // if filled send to ringbuffer, restart index
-		auto JackOutputChannelCount = GetJackOutputChannelCount();
         if (track == JackOutputChannelCount) {
 			if (!initialized) {
 				auto success = createClient(0, JackOutputChannelCount);
 				if (!success) {
 					return 0;
 				}
-			}
 
-			float* ptrMixedBuffer = mixedBuffer;
-			for (size_t i = 0; i < outputBuffer.size(); i++) {
-				auto elementSize = outputBuffer[i].size();
-				for (size_t j = 0; j < elementSize; j++) {
-					mixedBuffer[i+(j * outputBuffer.size())] = outputBuffer[i][j];
+				for (size_t channelIdx = 0; channelIdx < outputBuffer.size(); channelIdx++) {
+					for (size_t sampleFrameIdx = 0; sampleFrameIdx < outputBuffer[channelIdx].size(); sampleFrameIdx++) {
+						mixedBuffer[channelIdx + (sampleFrameIdx * outputBuffer.size())] = outputBuffer[channelIdx][sampleFrameIdx];
+					}
 				}
 			}
-			outputBuffer.clear();
 
             client->setAudioBuffer(mixedBuffer);
             track = 0;

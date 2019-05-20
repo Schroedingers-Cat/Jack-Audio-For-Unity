@@ -36,7 +36,7 @@ struct EffectData
 {
     float p[P_NUM];
     float tmpbuffer_in[BUFSIZE];
-	std::vector<float> tmpbuffer_out;
+	float tmpbuffer_out[BUFSIZE];
 	bool start;
 	bool instanceNumber;
 
@@ -59,7 +59,6 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK CreateCallback(UnityAudioEffectSta
     memset(data, 0, sizeof(EffectData));
 	data->start = true;
 	data->instanceNumber = JackClient::getInstance().IncreaseJackPluginInstanceIndex();
-	data->tmpbuffer_out.assign(BUFSIZE, 0);
     state->effectdata = data;
     InitParametersFromDefinitions(InternalRegisterEffectDefinition, data->p);
 
@@ -110,8 +109,7 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
 #ifdef DEBUG_OUT
 	if (data->p[P_OBJECT_MODE] > 0.5f) {
 		if (inchannels == 1) {
-			data->tmpbuffer_out.assign(inbuffer, inbuffer + length);
-			JackClient::getInstance().SetData(data->p[P_JACK_CHANNEL_INDEX], data->tmpbuffer_out);
+			JackClient::getInstance().SetData(data->p[P_JACK_CHANNEL_INDEX], inbuffer);
 		} else {
 			//downmix
 			for (int inputSampleIndex = 0, outputSampleIndex = 0; inputSampleIndex < length * inchannels; inputSampleIndex += inchannels, outputSampleIndex++) {
