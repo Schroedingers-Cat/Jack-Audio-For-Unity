@@ -80,11 +80,6 @@ public:
     }
 	
     int SetData(int idx, std::vector<float> buffer) {
-        
-		// FIXME: The reason why you need to set the exact jack output channel count in 
-		// Unity is that for interfacing the mixedBuffer here one needs to know the 
-		// jack output channel count
-		// -> replace mixedBuffer with data structure self-containing the channel number
 		outputBuffer.push_back(buffer);
         
         // Increase the index until the mixed buffer is filled.
@@ -102,8 +97,10 @@ public:
 
 			float* ptrMixedBuffer = mixedBuffer;
 			for (size_t i = 0; i < outputBuffer.size(); i++) {
-				std::copy(outputBuffer[i].begin(), outputBuffer[i].end(), ptrMixedBuffer);
-				ptrMixedBuffer += outputBuffer[i].size();
+				auto elementSize = outputBuffer[i].size();
+				for (size_t j = 0; j < elementSize; j++) {
+					mixedBuffer[i+(j * outputBuffer.size())] = outputBuffer[i][j];
+				}
 			}
 			outputBuffer.clear();
 
@@ -208,8 +205,7 @@ private:
 
     // TODO: use better this? http://stackoverflow.com/questions/35008089/elegantly-define-multi-dimensional-array-in-modern-c
     std::unique_ptr<InternalJackClient> client;
-    // float mixedBuffer[TRACKS * BUFSIZE];
-    // float mixedBufferIn[TRACKS * BUFSIZE];
+	// The buffer containing the audio of all channels/jack plugins (interleaved)
     float *mixedBuffer;
     float *mixedBufferIn;
 	std::vector<std::vector<float>> outputBuffer;
