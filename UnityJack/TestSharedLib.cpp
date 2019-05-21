@@ -121,7 +121,6 @@ public:
         client->getAudioBuffer(buffer);
     }
     
-
     int GetData(int idx, float* buffer) {
     
         if (!initialized) return 0;
@@ -177,9 +176,7 @@ public:
     void operator=(JackClient const&)  = delete;
 	// Only call this from the Unity jack send plugin. Keeps track of how many plugins are instantiated and with what channel count
 	void RegisterJackOutputChannelFromMixerPlugin(int channels) {
-		std::cout << "JACK: Input channel number is " << channels << std::endl;
 		jackOutputChannels.push_back(channels);
-		std::cout << "JACK: channels pushed back!" << std::endl;
 	}
 	int IncreaseJackPluginInstanceIndex() {
 		return jackPluginInstanceIndex++;
@@ -189,12 +186,9 @@ public:
 		for (size_t i = 0; i < jackOutputChannels.size(); i++) {
 			channels += jackOutputChannels[i];
 		}
-		std::cout << "Channels: " << channels << std::endl;
 		if (channels < jackPluginInstanceIndex) {
-			std::cout << "Returning channels: " << jackPluginInstanceIndex << std::endl;
 			return jackPluginInstanceIndex;
 		} else {
-			std::cout << "Returning Channels: " << channels << std::endl;
 			return channels;
 		}
 	}
