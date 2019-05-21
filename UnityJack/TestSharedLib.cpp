@@ -83,7 +83,7 @@ public:
 		auto JackOutputChannelCount = GetJackOutputChannelCount();
 
 		if (!initialized) {
-			outputBuffer.push_back(std::vector<float>(buffer[0], buffer[BUFSIZE]));
+			delayedInitOutputBuffer.push_back(std::vector<float>(buffer[0], buffer[BUFSIZE]));
 		} else {
 			for (size_t i = 0; i < BUFSIZE; i++) {
 				mixedBuffer[(i * JackOutputChannelCount) + idx] = buffer[i];
@@ -102,9 +102,9 @@ public:
 					return 0;
 				}
 
-				for (size_t channelIdx = 0; channelIdx < outputBuffer.size(); channelIdx++) {
-					for (size_t sampleFrameIdx = 0; sampleFrameIdx < outputBuffer[channelIdx].size(); sampleFrameIdx++) {
-						mixedBuffer[channelIdx + (sampleFrameIdx * outputBuffer.size())] = outputBuffer[channelIdx][sampleFrameIdx];
+				for (size_t channelIdx = 0; channelIdx < delayedInitOutputBuffer.size(); channelIdx++) {
+					for (size_t sampleFrameIdx = 0; sampleFrameIdx < delayedInitOutputBuffer[channelIdx].size(); sampleFrameIdx++) {
+						mixedBuffer[channelIdx + (sampleFrameIdx * delayedInitOutputBuffer.size())] = delayedInitOutputBuffer[channelIdx][sampleFrameIdx];
 					}
 				}
 			}
@@ -207,7 +207,8 @@ private:
 	// The buffer containing the audio of all channels/jack plugins (interleaved)
     float *mixedBuffer;
     float *mixedBufferIn;
-	std::vector<std::vector<float>> outputBuffer;
+	// The first mixed buffer will be temporarily assigned into this until the channel count is known
+	std::vector<std::vector<float>> delayedInitOutputBuffer;
 
     int foo = 5;
     int track;
