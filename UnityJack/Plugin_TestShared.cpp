@@ -38,7 +38,7 @@ struct EffectData
     float tmpbuffer_in[BUFSIZE];
 	float tmpbuffer_out[BUFSIZE];
 	bool start;
-	bool instanceNumber;
+	bool instanceCount;
 
 };
 
@@ -58,7 +58,7 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK CreateCallback(UnityAudioEffectSta
     EffectData* data = new EffectData;
     memset(data, 0, sizeof(EffectData));
 	data->start = true;
-	data->instanceNumber = JackClient::getInstance().IncreaseJackPluginInstanceIndex();
+	data->instanceCount = JackClient::getInstance().IncreaseJackPluginInstanceCount();
     state->effectdata = data;
     InitParametersFromDefinitions(InternalRegisterEffectDefinition, data->p);
 
@@ -86,9 +86,9 @@ UNITY_AUDIODSP_RESULT UNITY_AUDIODSP_CALLBACK ProcessCallback(UnityAudioEffectSt
 	{
 		data->start = false;
 		if (data->p[P_OBJECT_MODE] > 0.5f) {
-			JackClient::getInstance().RegisterJackOutputChannelFromMixerPlugin(1);
+			JackClient::getInstance().RegisterJackOutputChannelFromMixerPlugin(data->instanceCount, 1);
 		} else {
-			JackClient::getInstance().RegisterJackOutputChannelFromMixerPlugin(inchannels);
+			JackClient::getInstance().RegisterJackOutputChannelFromMixerPlugin(data->instanceCount, inchannels);
 		}
 		
 	}

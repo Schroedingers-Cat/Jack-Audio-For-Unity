@@ -28,6 +28,7 @@
 
 #include <stdio.h>
 #include <memory> //for std::unique_ptr
+#include <map>
 
 #if UNITY_OSX | UNITY_LINUX
     #include <sys/mman.h>
@@ -175,19 +176,21 @@ public:
     JackClient(JackClient const&) = delete;
     void operator=(JackClient const&)  = delete;
 	// Only call this from the Unity jack send plugin. Keeps track of how many plugins are instantiated and with what channel count
-	void RegisterJackOutputChannelFromMixerPlugin(int channels) {
-		jackOutputChannels.push_back(channels);
+	void RegisterJackOutputChannelFromMixerPlugin(int instanceCount, int channels) {
+		jackOutputChannels.insert(std::make_pair(instanceCount, channels));
 	}
-	int IncreaseJackPluginInstanceIndex() {
-		return jackPluginInstanceIndex++;
+	int IncreaseJackPluginInstanceCount() {
+		return jackPluginInstanceCount++;
 	}
 	int GetJackOutputChannelCount() {
 		int channels = 0;
-		for (size_t i = 0; i < jackOutputChannels.size(); i++) {
-			channels += jackOutputChannels[i];
+		for (auto i : jackOutputChannels)
+		{
+			channels += i.second;
 		}
-		if (channels < jackPluginInstanceIndex) {
-			return jackPluginInstanceIndex;
+
+		if (channels < jackPluginInstanceCount) {
+			return jackPluginInstanceCount;
 		} else {
 			return channels;
 		}
@@ -196,7 +199,7 @@ public:
 		return jackOutputChannels.size();
 	}
 	void ResetOutputTrackCount() {
-		jackPluginInstanceIndex = 0;
+		jackPluginInstanceCount = 0;
 		jackOutputChannels.clear();
 	}
 
@@ -214,8 +217,9 @@ private:
     int track;
     bool initialized;
     int _inputs, _outputs;
-	std::vector<int> jackOutputChannels;
-	int jackPluginInstanceIndex = 0;
+	std::map<int, int> jackOutputChannels;
+	//std::vector<int> jackOutputChannels;
+	int jackPluginInstanceCount = 0;
 };
     
 } // !namespace TestSharedStack
