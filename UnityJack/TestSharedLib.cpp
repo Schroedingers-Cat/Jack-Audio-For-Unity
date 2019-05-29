@@ -177,14 +177,14 @@ public:
     void operator=(JackClient const&)  = delete;
 	// Only call this from the Unity jack send plugin. Keeps track of how many plugins are instantiated and with what channel count
 	void RegisterJackOutputChannelFromMixerPlugin(int instanceCount, int channels) {
-		jackOutputChannels.insert(std::make_pair(instanceCount, channels));
+		jackPluginOutputChannels.insert(std::make_pair(instanceCount, channels));
 	}
 	int IncreaseJackPluginInstanceCount() {
 		return jackPluginInstanceCount++;
 	}
 	int GetJackOutputChannelCount() {
 		int channels = 0;
-		for (auto i : jackOutputChannels)
+		for (auto i : jackPluginOutputChannels)
 		{
 			channels += i.second;
 		}
@@ -196,11 +196,11 @@ public:
 		}
 	}
 	int GetJackOutputTracks() {
-		return jackOutputChannels.size();
+		return jackPluginOutputChannels.size();
 	}
 	void ResetOutputTrackCount() {
 		jackPluginInstanceCount = 0;
-		jackOutputChannels.clear();
+		jackPluginOutputChannels.clear();
 	}
 
 private:
@@ -217,8 +217,8 @@ private:
     int track;
     bool initialized;
     int _inputs, _outputs;
-	std::map<int, int> jackOutputChannels;
-	//std::vector<int> jackOutputChannels;
+	// The number of output channels (value) of each jack plugin instance (key)
+	std::map<int, int> jackPluginOutputChannels;
 	int jackPluginInstanceCount = 0;
 };
     
