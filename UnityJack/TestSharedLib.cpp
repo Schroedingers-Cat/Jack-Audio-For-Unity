@@ -163,6 +163,11 @@ public:
         }
         return initialized;
     }
+
+	bool ChangePortNumber() {
+		destroyClient();
+		return createClient(0, GetJackOutputChannelCount());
+	}
     
     
 private:
@@ -178,8 +183,10 @@ public:
 	// Only call this from the Unity jack send plugin. Keeps track of how many plugins are instantiated and with what channel count
 	void RegisterJackOutputChannelFromMixerPlugin(int instanceCount, int channels) {
 		jackPluginOutputChannels.insert(std::make_pair(instanceCount, channels));
+		ChangePortNumber();
 	}
 	int IncreaseJackPluginInstanceCount() {
+		ChangePortNumber();
 		return jackPluginInstanceCount++;
 	}
 	int GetJackOutputChannelCount() {
