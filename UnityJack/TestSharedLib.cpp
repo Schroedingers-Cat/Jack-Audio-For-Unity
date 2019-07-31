@@ -79,7 +79,7 @@ public:
         
         if (!initialized) return 0;
 
-        client->setAudioBuffer(buffer);
+        client->setAudioBuffer();
         return 0;
     }
 	
@@ -96,7 +96,7 @@ public:
 
         // if filled send to ringbuffer, restart index
         if (track == _outputs) {
-            client->setAudioBuffer(mixedBuffer);
+            client->setAudioBuffer();
             track = 0;
         }
         
@@ -105,7 +105,7 @@ public:
     
     void GetAllData(float* buffer) {
         if (!initialized) return;
-        client->getAudioBuffer(buffer);
+        client->getAudioBuffer();
     }
     
 
@@ -113,7 +113,7 @@ public:
     
         if (!initialized) return 0;
 
-        client->getAudioBuffer(mixedBufferIn);
+        client->getAudioBuffer();
         
         for (int i = 0; i < BUFSIZE; i++) {
             buffer[i] = mixedBufferIn[(i * _inputs) + idx];
