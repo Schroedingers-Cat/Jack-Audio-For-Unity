@@ -81,15 +81,23 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>AudioPlugin-$(ProjectName)</TargetName>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\lowlevel\inc;</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\lowlevel\lib;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>AudioPlugin-$(ProjectName)</TargetName>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\lowlevel\inc;</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\lowlevel\lib;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>AudioPlugin-$(ProjectName)</TargetName>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\lowlevel\inc;</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\lowlevel\lib;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>AudioPlugin-$(ProjectName)</TargetName>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\lowlevel\inc;</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\lowlevel\lib;</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -108,7 +116,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>kernel32.lib;user32.lib;winmm.lib;C:\Program Files (x86)\Jack\lib\libjack.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;winmm.lib;C:\Program Files (x86)\Jack\lib\libjack.lib;fmodL_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir ..\..\sample_jackscene\Assets\Plugins\x86
@@ -133,7 +141,7 @@ copy /y "$(TargetDir)$(TargetName).pdb" ..\..\sample_jackscene\Assets\Plugins\x8
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>kernel32.lib;user32.lib;winmm.lib;C:\Program Files (x86)\Jack\lib\libjack64.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;winmm.lib;C:\Program Files (x86)\Jack\lib\libjack64.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir ..\..\sample_jackscene\Assets\Plugins\x86_64
@@ -164,7 +172,7 @@ copy /y "$(TargetDir)$(TargetName).pdb" ..\..\sample_jackscene\Assets\Plugins\x8
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>kernel32.lib;user32.lib;winmm.lib;C:\Program Files (x86)\Jack\lib\libjack.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;winmm.lib;C:\Program Files (x86)\Jack\lib\libjack.lib;fmod_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir ..\..\sample_jackscene\Assets\Plugins\x86
@@ -195,7 +203,7 @@ copy /y "$(TargetPath)" ..\..\sample_jackscene\Assets\Plugins\x86\$(TargetName).
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalDependencies>kernel32.lib;user32.lib;winmm.lib;C:\Program Files (x86)\Jack\lib\libjack64.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;winmm.lib;C:\Program Files (x86)\Jack\lib\libjack64.lib;fmod64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir ..\..\sample_jackscene\Assets\Plugins\x86_64
@@ -204,12 +212,16 @@ copy /y "$(TargetPath)" ..\..\sample_jackscene\Assets\Plugins\x86_64\$(TargetNam
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\AudioPluginUtil.cpp" />
+    <ClCompile Include="..\common.cpp" />
+    <ClCompile Include="..\common_platform.cpp" />
     <ClCompile Include="..\Plugin_TestShared.cpp" />
     <ClCompile Include="..\TestSharedLib.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\AudioPluginInterface.h" />
     <ClInclude Include="..\AudioPluginUtil.h" />
+    <ClInclude Include="..\common.h" />
+    <ClInclude Include="..\common_platform.h" />
     <ClInclude Include="..\InternalJackClient.h" />
     <ClInclude Include="..\PluginList.h" />
   </ItemGroup>

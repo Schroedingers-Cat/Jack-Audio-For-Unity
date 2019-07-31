@@ -24,6 +24,9 @@
 #include <string>
 #include <stdexcept>  // for std::runtime_error
 #include <vector>     // for std::vector
+#include "fmod.hpp"
+#include "common.h"
+
 
 #define RINGBUF_SIZE 8192
 class InternalJackClient
@@ -95,7 +98,7 @@ public:
      //   
     	//if (jack_activate(mClient) != 0) throw std::runtime_error("Cannot activate the client");
 
-        
+		FMOD_Main();
     }
 
     virtual ~InternalJackClient()

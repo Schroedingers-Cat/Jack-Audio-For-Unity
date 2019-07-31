@@ -180,5 +180,3 @@ private:
 };
     
 } // !namespace TestSharedStack
-
-
